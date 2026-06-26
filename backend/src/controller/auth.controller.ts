@@ -74,24 +74,30 @@ export const login = async (
       return;
     }
 
-    // =========================================================================
-    // EXERCISE TODO: Complete the login function
-    // 
-    // Guidelines to implement this:
-    // 1. Look up the user by email using prisma.user.findUnique.
-    // 2. If the user doesn't exist, return a 401 response (e.g. "Invalid email or password").
-    // 3. Compare the provided password with the stored password hash using `bcrypt.compare`.
-    //    Hint: `const isPasswordValid = await bcrypt.compare(password, user.password);`
-    // 4. If the password is invalid, return a 401 response.
-    // 5. If everything is valid, generate a JWT token signed with user's ID:
-    //    Hint: `const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "7d" });`
-    // 6. Return a 200 response with the token and user object (excluding the password).
-    // =========================================================================
+    const user = await prisma.user.findUnique(
+      {where: {email}}
+    )
 
-    // Remove or comment out this block when you start implementing the login function
-    res.status(501).json({
-      message: "TODO: Implement login logic! Follow the comments in src/controller/auth.controller.ts",
-    });
+    if (!user || !user.password) {
+      res.status(401).json({error: "Invalid email or password"})
+      return
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user?.password);
+
+    if (!isPasswordValid) {
+      res.status(401).json({error: "Invalid email or password"})
+      return
+    }
+
+    const token = jwt.sign({userId: user.id}, JWT_SECRET, {expiresIn: "3d"})
+    res.status(200).json({token, user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    }})
   } catch (error) {
     next(error);
   }

@@ -2,6 +2,7 @@ import { Response, NextFunction } from "express";
 import { prisma } from "../prisma.js";
 import { AuthRequest } from "../types/index.js";
 import { TaskStatus } from "@prisma/client";
+import { error } from "console";
 
 export const getTasks = async (
   req: AuthRequest,
@@ -126,26 +127,31 @@ export const updateTask = async (
     }
     const { title, description, status, dueDate } = req.body;
 
-    // =========================================================================
-    // EXERCISE TODO: Complete the updateTask function
-    //
-    // Guidelines:
-    // 1. Fetch the task from the database by ID using `prisma.task.findUnique`.
-    // 2. If the task does not exist, return a 404 response.
-    // 3. Verify that the task's `ownerId` matches `req.user.id`.
-    //    If it doesn't match, return a 403 Forbidden response.
-    // 4. Update the task using `prisma.task.update` with the new fields:
-    //    - title (if provided)
-    //    - description (if provided or updated)
-    //    - status (if provided, validate it against the TaskStatus enum)
-    //    - dueDate (if provided, parse it to Date or set to null)
-    // 5. Return the updated task with a 200 Status code.
-    // =========================================================================
+    const task = await prisma.task.findUnique({
+      where: {id}
+    })
 
-    // Remove or comment out this block when you start implementing the updateTask function
-    res.status(501).json({
-      message: "TODO: Implement updateTask logic! Follow the comments in src/controller/task.controller.ts",
-    });
+    if (!task) {
+      res.status(404).json({error: "Task not found"})
+      return
+    }
+
+    if (task.ownerId != req.user.id) {
+      res.status(403).json({error: "Forbidden. You do not own this task."})
+      return
+    }
+
+    const updatedTask = await prisma.task.update({
+      where: {id},
+      data: {
+        title: title !== undefined ? title: undefined,
+        description: description !== undefined ? description: undefined,
+        status: status !== undefined ? status: undefined,
+        dueDate: dueDate !== undefined ? dueDate: undefined,
+      }
+    })
+
+    res.json(updatedTask);
   } catch (error) {
     next(error);
   }
@@ -168,22 +174,26 @@ export const deleteTask = async (
       return;
     }
 
-    // =========================================================================
-    // EXERCISE TODO: Complete the deleteTask function
-    //
-    // Guidelines:
-    // 1. Fetch the task from the database by ID.
-    // 2. If the task doesn't exist, return a 404 response.
-    // 3. Verify that the task's `ownerId` matches `req.user.id`.
-    //    If it doesn't match, return a 403 Forbidden response.
-    // 4. Delete the task using `prisma.task.delete`.
-    // 5. Return a 200/204 response (or a success message: e.g. { success: true })
-    // =========================================================================
+    const task = await prisma.task.findUnique({
+      where: {id}
+    })
 
-    // Remove or comment out this block when you start implementing the deleteTask function
-    res.status(501).json({
-      message: "TODO: Implement deleteTask logic! Follow the comments in src/controller/task.controller.ts",
-    });
+    if (!task) {
+      res.status(404).json({error: "Task not found."})
+      return
+    }
+
+    if (task.ownerId !== req.user.id) {
+      res.status(403).json({error: "Forbidden. You do not own this task."})
+      return
+    }
+
+    await prisma.task.delete({
+      where: {id}
+    })
+    
+    res.status(200).json({success: true})
+
   } catch (error) {
     next(error);
   }
