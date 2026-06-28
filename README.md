@@ -30,12 +30,6 @@ TaskKo/
    cp backend/.env.example backend/.env
    ```
 
-   On Windows PowerShell, use:
-
-   ```powershell
-   Copy-Item backend/.env.example backend/.env
-   ```
-
 3. Start Postgres:
 
    ```bash
@@ -56,7 +50,20 @@ npm run setup
 
 On Windows PowerShell, if `npm` is blocked by the local execution policy, use `npm.cmd` for the same commands.
 
+## Accessing the app
+
+You can log in using one of the seeded test user accounts:
+
+- **User 1**:
+  - **Email**: `user1@gmail.com`
+  - **Password**: `password`
+- **User 2**:
+  - **Email**: `user2@gmail.com`
+  - **Password**: `password`
+
 ## Running The App
+
+Ensure that the docker desktop is running.
 
 Start the backend and frontend together:
 
@@ -97,4 +104,11 @@ Create and run a migration:
 
 ```bash
 npm run prisma:migrate --workspace backend
+```
+
+Seed the database (creates 2 default users and sample tasks):
+
+```bash
+# From the backend directory
+npx prisma db seed
 ```

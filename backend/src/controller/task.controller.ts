@@ -75,7 +75,7 @@ export const createTask = async (
       return;
     }
 
-    const { title, description, status, dueDate } = req.body;
+    const { title, description, status } = req.body;
 
     if (!title) {
       res.status(400).json({ error: "Title is required." });
@@ -98,7 +98,6 @@ export const createTask = async (
         title,
         description,
         status: taskStatus,
-        dueDate: dueDate ? new Date(dueDate) : null,
         ownerId: req.user.id,
       },
     });
@@ -125,7 +124,7 @@ export const updateTask = async (
       res.status(400).json({ error: "Invalid task ID." });
       return;
     }
-    const { title, description, status, dueDate } = req.body;
+    const { title, description, status } = req.body;
 
     const task = await prisma.task.findUnique({
       where: {id}
@@ -147,7 +146,6 @@ export const updateTask = async (
         title: title !== undefined ? title: undefined,
         description: description !== undefined ? description: undefined,
         status: status !== undefined ? status: undefined,
-        dueDate: dueDate !== undefined ? dueDate: undefined,
       }
     })
 
