@@ -328,7 +328,7 @@ export default function Home() {
 
               <Field className="space-y-0.5">
                 <FieldLabel className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Email Addresss
+                  Email Address
                 </FieldLabel>
                 <div className="flex flex-col gap-2">
                   <Input
